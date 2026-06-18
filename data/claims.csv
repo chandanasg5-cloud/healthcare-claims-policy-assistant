@@ -1,0 +1,13 @@
+claim_id,patient_id,date_of_service,procedure_code,procedure_desc,diagnosis_code,billed_amount,status,denial_code,denial_reason
+CLM-1001,PAT-001,2025-01-15,99396,Annual wellness visit,Z00.00,250.00,approved,,
+CLM-1002,PAT-001,2025-06-20,99396,Annual wellness visit,Z00.00,250.00,denied,D-DUP,Second wellness visit in same calendar year
+CLM-1003,PAT-002,2025-02-10,70551,MRI brain,G43.909,1800.00,denied,D-NOAUTH,No prior authorization on file
+CLM-1004,PAT-002,2025-03-05,74177,CT abdomen,R10.9,1200.00,approved,,
+CLM-1005,PAT-003,2025-04-12,99385,Annual wellness visit,Z00.00,230.00,denied,D-OON,Provider out of network
+CLM-1006,PAT-004,2025-05-01,70551,MRI brain,G43.909,1800.00,denied,D-AUTHEXP,Authorization expired before service date
+CLM-1007,PAT-005,2025-05-18,29826,Shoulder arthroscopy,M75.100,4200.00,denied,D-NMN,Diagnosis does not support medical necessity
+CLM-1008,PAT-006,2025-06-02,0345T,Experimental cardiac procedure,I25.10,9500.00,denied,D-EXP,Experimental or investigational service
+CLM-1009,PAT-003,2025-07-09,74177,CT abdomen,R10.31,1200.00,denied,D-NOAUTH,No prior authorization on file
+CLM-1010,PAT-002,2025-08-21,99396,Annual wellness visit,Z00.00,250.00,approved,,
+CLM-1011,PAT-007,2025-09-03,70551,MRI brain,G44.209,1800.00,denied,D-NOAUTH,No prior authorization on file
+CLM-1012,PAT-005,2025-09-15,99213,Office visit,J06.9,140.00,denied,D-CODE,Invalid or unspecified diagnosis coding
