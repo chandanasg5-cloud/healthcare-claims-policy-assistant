@@ -1,8 +1,8 @@
 """Core retrieval-augmented generation logic for the Claims Policy Assistant.
 
 Pipeline: policy documents -> chunked -> embedded in ChromaDB (vector store).
-A question retrieves the most relevant policy chunks, which are passed to Claude
-as grounding context. Claude answers and cites the specific policy rule it used.
+A question retrieves the most relevant policy chunks, which are passed to Gemini
+as grounding context. Gemini answers and cites the specific policy rule it used.
 """
 
 from __future__ import annotations
@@ -14,7 +14,8 @@ from pathlib import Path
 
 import chromadb
 import pandas as pd
-from anthropic import Anthropic
+from google import genai
+from google.genai import types
 from pypdf import PdfReader
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -22,7 +23,7 @@ POLICY_DIR = DATA_DIR / "policies"
 CLAIMS_CSV = DATA_DIR / "claims.csv"
 CHROMA_DIR = Path(__file__).parent / ".chroma"
 
-MODEL = "claude-opus-4-8"
+MODEL = "gemini-2.5-flash"
 
 
 # --------------------------------------------------------------------------- #
@@ -97,7 +98,7 @@ def retrieve(collection: chromadb.Collection, query: str, k: int = 4) -> list[Re
 
 
 # --------------------------------------------------------------------------- #
-# Claude
+# Gemini
 # --------------------------------------------------------------------------- #
 SYSTEM_PROMPT = """You are a healthcare claims policy assistant for claims analysts.
 You answer strictly from the policy excerpts and claim data provided in the user
@@ -111,26 +112,29 @@ Rules:
 - Use plain language an analyst can paste into a case note."""
 
 
-def _client() -> Anthropic:
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+def _client() -> genai.Client:
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
         raise RuntimeError(
-            "ANTHROPIC_API_KEY is not set. Add it to your environment or a .env file."
+            "GEMINI_API_KEY is not set. Add it to your environment or a .env file."
         )
-    return Anthropic()
+    return genai.Client(api_key=api_key)
 
 
 def ask_stream(user_content: str):
-    """Yield Claude's answer text incrementally (for Streamlit st.write_stream)."""
+    """Yield Gemini's answer text incrementally (for Streamlit st.write_stream)."""
     client = _client()
-    with client.messages.stream(
+    stream = client.models.generate_content_stream(
         model=MODEL,
-        max_tokens=2048,
-        thinking={"type": "adaptive"},
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_content}],
-    ) as stream:
-        for text in stream.text_stream:
-            yield text
+        contents=user_content,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            max_output_tokens=2048,
+        ),
+    )
+    for chunk in stream:
+        if chunk.text:
+            yield chunk.text
 
 
 def ask(user_content: str) -> str:
