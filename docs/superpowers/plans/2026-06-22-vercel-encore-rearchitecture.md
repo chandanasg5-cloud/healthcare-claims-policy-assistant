@@ -21,6 +21,23 @@
 
 ---
 
+## Execution Environment (no local Docker)
+
+This environment has Node + npm + the Encore CLI, but **no Docker**, so Encore cannot run a local Postgres. Database-backed verification is **deferred to Encore Cloud**. Adapt the verification steps accordingly:
+
+- **Runs locally (must pass before a task is complete):**
+  - Pure-function tests via `npx vitest run <file>` — these import only plain TypeScript modules with **no** `encore.dev` imports (`parse.ts`, `format.ts`).
+  - `npx tsc --noEmit` from `backend/` to typecheck the whole backend (covers all Encore-coupled modules).
+  - Frontend: `npm install` and `npm run build` from `frontend/`.
+- **Deferred to Encore Cloud (write the test/code now; do NOT attempt locally):**
+  - Any step that runs `encore test` or `encore run` and touches the database (retrieval, the API endpoints, the seed integration, streaming smoke tests). Importing a module that pulls in `db.ts` instantiates `SQLDatabase`, which needs the Encore runtime — so these only run under `encore test` with Docker, or on Encore Cloud.
+- **Key rule for testability:** keep pure logic in modules that do **not** import `db.ts`/`encore.dev` (e.g. `parse.ts`), so `npx vitest` can exercise it without the Encore runtime. `format.ts` uses type-only imports and is likewise pure.
+- The Anthropic API key is not available locally, so streaming smoke tests are deferred to cloud as well.
+
+Wherever a task step below says "Run: `encore test ...` / `encore run`" for DB-backed code, treat it as **deferred**: instead run `npx tsc --noEmit` locally to confirm it compiles, and note the DB test is verified on cloud. Steps using `npx vitest` on `parse.ts`/`format.ts` and the frontend build run locally as written.
+
+---
+
 ## File Structure
 
 ```
@@ -37,15 +54,16 @@ backend/
     ├── data/
     │   ├── claims.csv               # moved from repo data/
     │   └── policies/*.md            # moved from repo data/policies/
-    ├── seed.ts                      # parse CSV + chunk policies, lazy idempotent seed
+    ├── parse.ts                     # PURE: chunkPolicy, parseClaimsCsv, ClaimRow (no Encore imports)
+    ├── seed.ts                      # DB-coupled: ensureSeeded (imports parse.ts + db.ts)
     ├── retrieval.ts                 # full-text search over policy_chunks
     ├── claude.ts                    # @anthropic-ai/sdk wrapper + system prompt + streaming helper
-    ├── format.ts                    # _format_claim / _policy_context ports
+    ├── format.ts                    # _format_claim / _policy_context ports (type-only imports; pure)
     ├── api.ts                       # the 5 feature endpoints + GET /claims
-    ├── seed.test.ts
-    ├── retrieval.test.ts
-    ├── format.test.ts
-    └── api.test.ts
+    ├── parse.test.ts                # local vitest (pure)
+    ├── retrieval.test.ts            # deferred to cloud (DB)
+    ├── format.test.ts               # local vitest (pure)
+    └── api.test.ts                  # deferred to cloud (DB)
 frontend/
 ├── package.json
 ├── next.config.mjs
@@ -209,24 +227,26 @@ git commit -m "feat(backend): Encore scaffold + claims/policy_chunks schema"
 
 ---
 
-### Task 2: Seed logic (parse CSV + chunk policies)
+### Task 2: Pure parsing (`parse.ts`) + DB seed (`seed.ts`)
+
+> **Environment note:** `parse.ts` has NO Encore imports, so its tests run locally under `npx vitest`. `seed.ts` imports `db.ts` (DB-coupled) — its verification is `npx tsc --noEmit` locally; the actual seeding runs on Encore Cloud.
 
 **Files:**
+- Create: `backend/claims/parse.ts`
 - Create: `backend/claims/seed.ts`
-- Test: `backend/claims/seed.test.ts`
+- Test: `backend/claims/parse.test.ts`
 
 **Interfaces:**
-- Consumes: `db` from `./db`.
+- Consumes: `db` from `./db` (in `seed.ts` only).
 - Produces:
-  - `chunkPolicy(text: string, source: string): { id: string; source: string; text: string }[]`
-  - `parseClaimsCsv(csv: string): ClaimRow[]` where `ClaimRow` has the 10 CSV columns as `string` fields.
-  - `ensureSeeded(): Promise<void>` — idempotent; populates both tables from `data/` on first call.
+  - From `parse.ts`: `chunkPolicy(text, source)`, `parseClaimsCsv(csv): ClaimRow[]`, and the `ClaimRow` interface (10 CSV columns as `string` fields). **`ClaimRow` is defined here and imported elsewhere as `type` from `./parse`.**
+  - From `seed.ts`: `ensureSeeded(): Promise<void>` — idempotent; populates both tables from `data/` on first call.
 
-- [ ] **Step 1: Write the failing test for `chunkPolicy`**
+- [ ] **Step 1: Write the failing test for the pure functions**
 
 ```typescript
 import { describe, it, expect } from "vitest";
-import { chunkPolicy, parseClaimsCsv } from "./seed";
+import { chunkPolicy, parseClaimsCsv } from "./parse";
 
 describe("chunkPolicy", () => {
   it("splits on blank lines, drops short blocks, ids by source+index", () => {
@@ -260,19 +280,12 @@ describe("parseClaimsCsv", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run (from `backend/`): `npx vitest run claims/seed.test.ts`
-Expected: FAIL — `chunkPolicy`/`parseClaimsCsv` not exported.
+Run (from `backend/`): `npx vitest run claims/parse.test.ts`
+Expected: FAIL — `chunkPolicy`/`parseClaimsCsv` not exported (module `./parse` missing).
 
-- [ ] **Step 3: Implement `backend/claims/seed.ts`**
+- [ ] **Step 3: Implement `backend/claims/parse.ts` (pure — NO Encore imports)**
 
 ```typescript
-import { readFileSync, readdirSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { db } from "./db";
-
-const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "data");
-
 export interface ClaimRow {
   claim_id: string;
   patient_id: string;
@@ -315,6 +328,23 @@ export function parseClaimsCsv(csv: string): ClaimRow[] {
     return row;
   });
 }
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run (from `backend/`): `npx vitest run claims/parse.test.ts`
+Expected: PASS (both `chunkPolicy` and `parseClaimsCsv` tests).
+
+- [ ] **Step 5: Implement `backend/claims/seed.ts` (DB-coupled — verified via tsc, seeding deferred to cloud)**
+
+```typescript
+import { readFileSync, readdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { db } from "./db";
+import { chunkPolicy, parseClaimsCsv } from "./parse";
+
+const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "data");
 
 let seeded: Promise<void> | null = null;
 
@@ -352,16 +382,16 @@ async function doSeed(): Promise<void> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 6: Typecheck (local gate for the DB-coupled module)**
 
-Run (from `backend/`): `npx vitest run claims/seed.test.ts`
-Expected: PASS (both `chunkPolicy` and `parseClaimsCsv` tests).
+Run (from `backend/`): `npx tsc --noEmit`
+Expected: no type errors. (Actual seeding runs on Encore Cloud.)
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add backend/claims/seed.ts backend/claims/seed.test.ts
-git commit -m "feat(backend): idempotent seed from claims.csv and policy markdown"
+git add backend/claims/parse.ts backend/claims/seed.ts backend/claims/parse.test.ts
+git commit -m "feat(backend): pure CSV/policy parsing + idempotent DB seed"
 ```
 
 ---
@@ -456,7 +486,7 @@ git commit -m "feat(backend): full-text policy retrieval"
 ```typescript
 import { describe, it, expect } from "vitest";
 import { formatClaim, policyContext } from "./format";
-import type { ClaimRow } from "./seed";
+import type { ClaimRow } from "./parse";
 
 const denied: ClaimRow = {
   claim_id: "CLM-1003", patient_id: "PAT-002", date_of_service: "2025-02-10",
@@ -495,7 +525,7 @@ Expected: FAIL — `formatClaim`/`policyContext` not exported.
 - [ ] **Step 3: Implement `backend/claims/format.ts`**
 
 ```typescript
-import type { ClaimRow } from "./seed";
+import type { ClaimRow } from "./parse";
 import type { Retrieved } from "./retrieval";
 
 export function formatClaim(c: ClaimRow): string {
@@ -621,7 +651,8 @@ Expected: FAIL — `listClaims`/`similarDenied` not defined.
 ```typescript
 import { api, Query } from "encore.dev/api";
 import { db } from "./db";
-import { ensureSeeded, type ClaimRow } from "./seed";
+import { ensureSeeded } from "./seed";
+import type { ClaimRow } from "./parse";
 
 async function allRows(): Promise<ClaimRow[]> {
   await ensureSeeded();
