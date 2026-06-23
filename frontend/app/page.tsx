@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   getClaims,
@@ -42,19 +42,35 @@ export default function Page() {
   const denied = claims.filter((c) => c.status === "denied");
   const patients = [...new Set(claims.map((c) => c.patient_id))].sort();
 
-  async function run(gen: AsyncGenerator<string>) {
+  const abortRef = useRef<AbortController | null>(null);
+
+  async function run(make: (signal: AbortSignal) => AsyncGenerator<string>) {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setAnswer("");
     setBusy(true);
     try {
-      for await (const t of gen) setAnswer((a) => a + t);
+      for await (const t of make(controller.signal)) {
+        if (controller.signal.aborted) break;
+        setAnswer((a) => a + t);
+      }
     } catch {
-      setAnswer((a) => a + "\n[stream error — is the backend running?]");
+      if (!controller.signal.aborted) {
+        setAnswer((a) => a + "\n[stream error — is the backend running?]");
+      }
     } finally {
-      setBusy(false);
+      if (abortRef.current === controller) {
+        setBusy(false);
+        abortRef.current = null;
+      }
     }
   }
 
   function switchTab(t: Tab) {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setBusy(false);
     setTab(t);
     setAnswer("");
     setSimilar(null);
@@ -115,7 +131,7 @@ export default function Page() {
             <DeniedSelect denied={denied} value={deniedId} onChange={setDeniedId} />
             <RunButton
               disabled={!deniedId || busy}
-              onClick={() => run(whyDenied(deniedId))}
+              onClick={() => run((s) => whyDenied(deniedId, s))}
             >
               Explain denial
             </RunButton>
@@ -129,7 +145,7 @@ export default function Page() {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
             />
-            <RunButton disabled={busy} onClick={() => run(whichPolicy(question))}>
+            <RunButton disabled={busy} onClick={() => run((s) => whichPolicy(question, s))}>
               Find the rule
             </RunButton>
           </Controls>
@@ -151,7 +167,7 @@ export default function Page() {
             </select>
             <RunButton
               disabled={!patientId || busy}
-              onClick={() => run(patientHistory(patientId))}
+              onClick={() => run((s) => patientHistory(patientId, s))}
             >
               Summarize
             </RunButton>
@@ -182,7 +198,7 @@ export default function Page() {
             <DeniedSelect denied={denied} value={deniedId} onChange={setDeniedId} />
             <RunButton
               disabled={!deniedId || busy}
-              onClick={() => run(appealSummary(deniedId))}
+              onClick={() => run((s) => appealSummary(deniedId, s))}
             >
               Draft appeal
             </RunButton>
