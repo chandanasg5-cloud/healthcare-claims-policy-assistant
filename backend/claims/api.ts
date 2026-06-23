@@ -61,7 +61,6 @@ async function readJsonBody(req: any): Promise<any> {
 function sseInit(resp: any): void {
   resp.setHeader("Content-Type", "text/event-stream");
   resp.setHeader("Cache-Control", "no-cache");
-  resp.setHeader("Connection", "keep-alive");
 }
 
 function sseSend(resp: any, text: string): void {
@@ -72,70 +71,86 @@ async function streamAnswer(resp: any, userContent: string): Promise<void> {
   for await (const text of askStream(userContent)) sseSend(resp, text);
 }
 
+// Wraps a streaming handler so the SSE response is ALWAYS ended — even if the
+// body is malformed or Claude errors mid-stream — otherwise the connection hangs.
+async function sseEndpoint(
+  req: any,
+  resp: any,
+  handler: (body: any) => Promise<void>,
+): Promise<void> {
+  sseInit(resp);
+  try {
+    let body: any;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sseSend(resp, "Invalid request body.");
+      return;
+    }
+    await handler(body);
+  } catch {
+    sseSend(resp, "Sorry, an error occurred while generating the answer.");
+  } finally {
+    resp.end();
+  }
+}
+
 export const whyDenied = api.raw(
   { expose: true, method: "POST", path: "/why-denied" },
-  async (req, resp) => {
-    sseInit(resp);
-    const { claimId } = await readJsonBody(req);
-    const row = await getClaim(claimId);
-    if (!row) { sseSend(resp, `No claim found with id ${claimId}.`); resp.end(); return; }
-    const query = `${row.denial_reason} ${row.procedure_desc} denial ${row.denial_code}`;
-    const ctx = policyContext(await retrieve(query));
-    await streamAnswer(resp,
-      `CLAIM:\n${formatClaim(row)}\n\nRELEVANT POLICY EXCERPTS:\n${ctx}\n\n` +
-      `Question: Why was claim ${claimId} denied? Explain the reason and cite the ` +
-      `policy rule that supports the denial.`);
-    resp.end();
-  },
+  (req, resp) =>
+    sseEndpoint(req, resp, async ({ claimId }) => {
+      const row = await getClaim(claimId);
+      if (!row) { sseSend(resp, `No claim found with id ${claimId}.`); return; }
+      const query = `${row.denial_reason} ${row.procedure_desc} denial ${row.denial_code}`;
+      const ctx = policyContext(await retrieve(query));
+      await streamAnswer(resp,
+        `CLAIM:\n${formatClaim(row)}\n\nRELEVANT POLICY EXCERPTS:\n${ctx}\n\n` +
+        `Question: Why was claim ${claimId} denied? Explain the reason and cite the ` +
+        `policy rule that supports the denial.`);
+    }),
 );
 
 export const whichPolicy = api.raw(
   { expose: true, method: "POST", path: "/which-policy" },
-  async (req, resp) => {
-    sseInit(resp);
-    const { question } = await readJsonBody(req);
-    const ctx = policyContext(await retrieve(question));
-    await streamAnswer(resp,
-      `RELEVANT POLICY EXCERPTS:\n${ctx}\n\n` +
-      `Question: Which policy rule applies to the following situation, and what ` +
-      `does it require? ${question}`);
-    resp.end();
-  },
+  (req, resp) =>
+    sseEndpoint(req, resp, async ({ question }) => {
+      const ctx = policyContext(await retrieve(question));
+      await streamAnswer(resp,
+        `RELEVANT POLICY EXCERPTS:\n${ctx}\n\n` +
+        `Question: Which policy rule applies to the following situation, and what ` +
+        `does it require? ${question}`);
+    }),
 );
 
 export const patientHistory = api.raw(
   { expose: true, method: "POST", path: "/patient-history" },
-  async (req, resp) => {
-    sseInit(resp);
-    const { patientId } = await readJsonBody(req);
-    await ensureSeeded();
-    const rows = db.query<ClaimRow>`SELECT * FROM claims WHERE patient_id = ${patientId} ORDER BY claim_id`;
-    const claims: ClaimRow[] = [];
-    for await (const r of rows) claims.push(r);
-    if (claims.length === 0) { sseSend(resp, `No claims found for patient ${patientId}.`); resp.end(); return; }
-    const listing = claims.map(formatClaim).join("\n");
-    await streamAnswer(resp,
-      `CLAIM HISTORY FOR ${patientId}:\n${listing}\n\n` +
-      `Question: Summarize this patient's claim history. Note totals, what was ` +
-      `approved versus denied, and any recurring denial patterns.`);
-    resp.end();
-  },
+  (req, resp) =>
+    sseEndpoint(req, resp, async ({ patientId }) => {
+      await ensureSeeded();
+      const rows = db.query<ClaimRow>`SELECT * FROM claims WHERE patient_id = ${patientId} ORDER BY claim_id`;
+      const claims: ClaimRow[] = [];
+      for await (const r of rows) claims.push(r);
+      if (claims.length === 0) { sseSend(resp, `No claims found for patient ${patientId}.`); return; }
+      const listing = claims.map(formatClaim).join("\n");
+      await streamAnswer(resp,
+        `CLAIM HISTORY FOR ${patientId}:\n${listing}\n\n` +
+        `Question: Summarize this patient's claim history. Note totals, what was ` +
+        `approved versus denied, and any recurring denial patterns.`);
+    }),
 );
 
 export const appealSummary = api.raw(
   { expose: true, method: "POST", path: "/appeal-summary" },
-  async (req, resp) => {
-    sseInit(resp);
-    const { claimId } = await readJsonBody(req);
-    const row = await getClaim(claimId);
-    if (!row) { sseSend(resp, `No claim found with id ${claimId}.`); resp.end(); return; }
-    const query = `appeal ${row.denial_reason} ${row.denial_code}`;
-    const ctx = policyContext(await retrieve(query));
-    await streamAnswer(resp,
-      `CLAIM:\n${formatClaim(row)}\n\nRELEVANT POLICY EXCERPTS:\n${ctx}\n\n` +
-      `Task: Draft a concise appeal summary for this denied claim. State the claim ` +
-      `details, the denial reason, the policy basis for an appeal (cite the rule), ` +
-      `and what documentation the provider should submit. Keep it under 200 words.`);
-    resp.end();
-  },
+  (req, resp) =>
+    sseEndpoint(req, resp, async ({ claimId }) => {
+      const row = await getClaim(claimId);
+      if (!row) { sseSend(resp, `No claim found with id ${claimId}.`); return; }
+      const query = `appeal ${row.denial_reason} ${row.denial_code}`;
+      const ctx = policyContext(await retrieve(query));
+      await streamAnswer(resp,
+        `CLAIM:\n${formatClaim(row)}\n\nRELEVANT POLICY EXCERPTS:\n${ctx}\n\n` +
+        `Task: Draft a concise appeal summary for this denied claim. State the claim ` +
+        `details, the denial reason, the policy basis for an appeal (cite the rule), ` +
+        `and what documentation the provider should submit. Keep it under 200 words.`);
+    }),
 );
