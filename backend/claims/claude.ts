@@ -29,7 +29,7 @@ export async function* askStream(userContent: string): AsyncGenerator<string> {
     thinking: { type: "adaptive" },
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: userContent }],
-  } as any);
+  });
   for await (const event of stream) {
     if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
       yield event.delta.text;
