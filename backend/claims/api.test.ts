@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { listClaims, similarDenied } from "./api";
+import { listClaims, similarDenied, getClaim } from "./api";
 
 describe("listClaims", () => {
   it("returns all seeded claims", async () => {
@@ -19,5 +19,15 @@ describe("similarDenied", () => {
   it("returns empty when the reference claim has no denial code", async () => {
     const res = await similarDenied({ claimId: "CLM-1001" }); // approved
     expect(res.claims).toEqual([]);
+  });
+});
+
+describe("getClaim", () => {
+  it("returns null for an unknown claim id", async () => {
+    expect(await getClaim("CLM-DOES-NOT-EXIST")).toBeNull();
+  });
+  it("returns the row for a known claim id", async () => {
+    const c = await getClaim("CLM-1003");
+    expect(c?.denial_code).toBe("D-NOAUTH");
   });
 });
