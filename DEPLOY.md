@@ -32,11 +32,19 @@ client-generation step** — the frontend just needs the backend's URL.
 3. Add an environment variable: `NEXT_PUBLIC_API_URL = <the Encore Cloud base URL>`.
 4. Deploy. Vercel auto-deploys on every push to `main`.
 
-## 3. CORS
+## 3. CORS — and the one thing to verify after first deploy
 
 `backend/encore.app` includes a `global_cors` block allowing cross-origin requests, so
 the browser on the Vercel origin can call the Encore API (JSON + SSE) directly. If you
 lock CORS down later, allow your Vercel domain explicitly.
+
+**Verify after the first deploy:** the streaming endpoints use `api.raw` (SSE) rather than
+managed `api()` handlers. Encore applies CORS at the gateway, so they should be covered —
+but confirm it the one way local gates can't: open the deployed Vercel site **in a browser**
+and run one streaming feature (e.g. "Why denied?"). If the JSON tabs (claims list, similar
+denials) work but the streaming answers are blocked, the `api.raw` responses aren't getting
+`Access-Control-Allow-Origin` — set it explicitly in `sseInit` (`backend/claims/api.ts`).
+Test from a browser, not `curl` (curl ignores CORS).
 
 ## Notes
 
