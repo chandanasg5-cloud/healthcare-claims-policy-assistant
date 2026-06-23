@@ -36,6 +36,15 @@ This environment has Node + npm + the Encore CLI, but **no Docker**, so Encore c
 
 Wherever a task step below says "Run: `encore test ...` / `encore run`" for DB-backed code, treat it as **deferred**: instead run `npx tsc --noEmit` locally to confirm it compiles, and note the DB test is verified on cloud. Steps using `npx vitest` on `parse.ts`/`format.ts` and the frontend build run locally as written.
 
+## Architecture Update (SSE pivot — applied during execution)
+
+`encore gen client` cannot run in this no-Docker environment (it requires the app built by the Encore daemon or a deployed cloud env; locally it errors looking for `go.mod`). To avoid coupling the frontend build to a codegen step, the four streaming endpoints were changed from Encore `streamOut` (WebSocket + generated client) to **SSE via `api.raw`**: each is a `POST` returning `text/event-stream`, emitting `data: {"text":"..."}\n\n` per Claude delta. Consequences:
+
+- **Task 7 (generate frontend client) is REMOVED** — no generated client is needed.
+- The frontend (**Task 8**, which now also covers former Task 9's streaming features) talks to the backend with plain `fetch`: JSON for `GET /claims` and `GET /similar-denied`; a `fetch` + `ReadableStream` SSE reader for the four answer endpoints. Backend base URL from `NEXT_PUBLIC_API_URL`.
+- `frontend/lib/client.ts` is NOT created; `frontend/lib/api.ts` is hand-written.
+- The frontend builds locally and on Vercel with no codegen — directly serving the deploy goal.
+
 ---
 
 ## File Structure

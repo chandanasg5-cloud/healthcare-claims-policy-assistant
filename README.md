@@ -1,11 +1,11 @@
 # Healthcare Claims Policy Assistant
 
-A retrieval-augmented (RAG) assistant that lets a claims analyst ask plain-language
+A retrieval-augmented assistant that lets a claims analyst ask plain-language
 questions about denied healthcare claims and get answers grounded in the actual
-policy documents, with the governing rule cited.
+policy documents, with the governing rule cited (e.g. `COV-002.2`).
 
-It connects three things claims and healthcare-analyst roles care about: claims
-data, policy interpretation, and turning complex rules into a usable answer.
+Re-architected from a Streamlit prototype into a **Next.js frontend (Vercel)** +
+**Encore TypeScript backend (Encore Cloud)** monorepo, driven by GitHub CI/CD.
 
 ## What it does
 
@@ -14,47 +14,65 @@ An analyst can ask:
 - **Why was this claim denied?** — explains the denial and cites the policy rule.
 - **Which policy rule applies?** — retrieves the relevant rule for any situation.
 - **Summarize this patient's claim history.** — totals, approvals vs denials, patterns.
-- **Find similar denied claims.** — groups claims by denial reason.
+- **Find similar denied claims.** — groups claims by denial code (no LLM).
 - **Generate an appeal summary.** — drafts a policy-grounded appeal for a denial.
 
-## How it works
+## Architecture
 
 ```
-policy docs (PDF / Markdown)
-        │  chunk + embed
-        ▼
-   ChromaDB vector store ──► retrieve top-k relevant rules
-        │                              │
-   claims.csv (pandas) ────────────────┤  assemble grounded context
-                                       ▼
-                              Claude (claude-opus-4-8)
-                                       │  cite the rule, answer
-                                       ▼
-                                Streamlit UI
+Browser ──► Next.js (Vercel) ──fetch JSON + SSE──► Encore API ──► Postgres
+                                                        │           (claims +
+                                                        │            policy_chunks,
+                                                        │            full-text tsvector)
+                                                        └──► Claude (claude-opus-4-8)
 ```
 
-The model is instructed to answer **only** from the retrieved policy excerpts and
-to cite the specific rule id (e.g. `COV-002.2`), so answers are traceable rather
-than guessed — which is the entire point in claims work.
+- **Retrieval** is Postgres **full-text search** (`tsvector` / `plainto_tsquery` /
+  `ts_rank`) over chunked policy documents — no external embeddings service.
+- **Streaming** answers use **Server-Sent Events** (`api.raw`), so the frontend talks
+  to the backend with plain `fetch` — no generated client, no codegen step.
+- The model answers **only** from retrieved policy excerpts and cites the rule id,
+  so answers are traceable rather than guessed.
+
+## Layout
+
+- `frontend/` — Next.js App Router app → Vercel (set **Root Directory = `frontend/`**).
+- `backend/`  — Encore TypeScript service + Postgres → Encore Cloud.
+- `docs/superpowers/` — design spec and implementation plan.
 
 ## Tech stack
 
-Python · Streamlit · ChromaDB (vector database) · Anthropic Claude · pandas · pypdf
+TypeScript · Encore.ts · Postgres (full-text search) · Next.js · Tailwind ·
+Anthropic Claude (`claude-opus-4-8`) · Server-Sent Events
 
-## Run it
+## Local development
+
+The backend needs a Postgres database. Encore provisions it locally **via Docker**
+(`encore run`), or on Encore Cloud when deployed (see `DEPLOY.md`).
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env        # then paste your Anthropic API key into .env
-export ANTHROPIC_API_KEY=sk-ant-...   # or rely on the .env file
-streamlit run app.py
+# Backend (requires Docker for the local DB)
+cd backend
+encore secret set --type local AnthropicApiKey   # paste your sk-ant-... key
+encore run
+
+# Frontend (no Docker needed)
+cd frontend
+cp .env.local.example .env.local                 # NEXT_PUBLIC_API_URL=http://localhost:4000
+npm install
+npm run dev                                       # http://localhost:3000
 ```
+
+Without Docker, run the backend on Encore Cloud and point the frontend's
+`NEXT_PUBLIC_API_URL` at the deployed URL.
+
+## Deployment
+
+See [`DEPLOY.md`](./DEPLOY.md) — connect GitHub to Encore Cloud (`backend/`) and
+Vercel (`frontend/`); both auto-deploy on push to `main`.
 
 ## Data
 
-`data/policies/` holds sample coverage policies (preventive care, prior
-authorization, medical necessity). `data/claims.csv` holds synthetic claims.
-Drop your own policy PDFs into `data/policies/` and they are indexed automatically.
-
-All data here is synthetic and for demonstration only.
+`backend/claims/data/policies/` holds sample coverage policies (preventive care,
+prior authorization, medical necessity); `backend/claims/data/claims.csv` holds
+synthetic claims. All data here is synthetic and for demonstration only.
