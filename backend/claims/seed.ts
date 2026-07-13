@@ -1,10 +1,8 @@
-import { readFileSync, readdirSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { db } from "./db";
 import { chunkPolicy, parseClaimsCsv } from "./parse";
-
-const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "data");
+// Seed data is embedded (claims/data.ts) rather than read from disk: the
+// deployed bundle does not include loose files under claims/data/.
+import { CLAIMS_CSV, POLICIES } from "./data";
 
 let seeded: Promise<void> | null = null;
 
@@ -17,7 +15,7 @@ async function doSeed(): Promise<void> {
   const existing = await db.queryRow`SELECT COUNT(*)::int AS n FROM claims`;
   if (existing && existing.n > 0) return;
 
-  const claims = parseClaimsCsv(readFileSync(join(DATA_DIR, "claims.csv"), "utf-8"));
+  const claims = parseClaimsCsv(CLAIMS_CSV);
   for (const c of claims) {
     await db.exec`
       INSERT INTO claims (claim_id, patient_id, date_of_service, procedure_code, procedure_desc,
@@ -28,9 +26,7 @@ async function doSeed(): Promise<void> {
     `;
   }
 
-  const policyDir = join(DATA_DIR, "policies");
-  for (const file of readdirSync(policyDir).filter((f) => f.endsWith(".md"))) {
-    const text = readFileSync(join(policyDir, file), "utf-8");
+  for (const [file, text] of Object.entries(POLICIES)) {
     for (const chunk of chunkPolicy(text, file)) {
       await db.exec`
         INSERT INTO policy_chunks (id, source, text)
