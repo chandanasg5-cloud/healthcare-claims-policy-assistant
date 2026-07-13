@@ -36,6 +36,27 @@ export function parsePolicyDoc(raw: string): PolicyDoc {
 
 const MAX_CHUNK = 1200;
 
+// Given a paragraph fragment `p` that is longer than `limit`, choose where to
+// cut it so the head fits within `limit` chars without breaking a word.
+// Preference order: last ". " sentence boundary that falls in the second
+// half of the window; otherwise the last whitespace before the limit;
+// otherwise (a single unbroken token spanning the whole window) fall back to
+// a raw offset cut. Exactly the separator character (if any) is dropped, so
+// no text is lost or duplicated when the two halves are rejoined.
+function splitParagraphFragment(p: string, limit: number): { head: string; rest: string } {
+  const window = p.slice(0, limit);
+  const lastSentence = window.lastIndexOf(". ");
+  if (lastSentence !== -1 && lastSentence >= limit / 2) {
+    const cut = lastSentence + 1; // keep the period, drop the trailing space
+    return { head: p.slice(0, cut), rest: p.slice(cut + 1) };
+  }
+  const lastWs = window.search(/\s(?=\S*$)/);
+  if (lastWs !== -1) {
+    return { head: p.slice(0, lastWs), rest: p.slice(lastWs + 1) };
+  }
+  return { head: p.slice(0, limit), rest: p.slice(limit) };
+}
+
 // Chunks follow the document's `## ` sections; each chunk is prefixed with its
 // section heading so retrieval hits carry their context. Long sections are
 // packed into ~MAX_CHUNK-char chunks on paragraph boundaries.
@@ -71,9 +92,9 @@ export function chunkPolicy(text: string, source: string) {
           buf = buf ? `${buf}\n\n${p}` : p;
           p = "";
         } else {
-          const chunk = p.slice(0, availableForP);
-          buf = buf ? `${buf}\n\n${chunk}` : chunk;
-          p = p.slice(availableForP);
+          const { head, rest } = splitParagraphFragment(p, availableForP);
+          buf = buf ? `${buf}\n\n${head}` : head;
+          p = rest;
           flush();
         }
       }

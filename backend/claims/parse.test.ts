@@ -54,6 +54,68 @@ describe("chunkPolicy", () => {
     expect(chunks.map((c) => c.id)).toEqual(chunks.map((_, i) => `timely-filing.md#${i}`));
     expect(chunks.filter((c) => c.text.includes("Administrative error")).length).toBeGreaterThan(1);
   });
+
+  // Strips a chunk's leading `heading\n` line (if present) to get just the
+  // body text that was packed from the original paragraph(s).
+  const stripHeadingLine = (chunkText: string, heading: string) =>
+    heading && chunkText.startsWith(`${heading}\n`)
+      ? chunkText.slice(heading.length + 1)
+      : chunkText;
+
+  const normalizeWhitespace = (s: string) => s.replace(/\s+/g, " ").trim();
+
+  it("never breaks a word across chunks when splitting an oversized paragraph", () => {
+    // Build one long paragraph of distinct, unique words with no sentence
+    // punctuation at all, forcing the whitespace-boundary fallback path.
+    const words = Array.from({ length: 400 }, (_, i) => `word${i}`);
+    const longParagraph = words.join(" ");
+    const doc = `---
+title: Long Paragraph Test
+source_url: https://example.com/doc
+---
+
+## A Long Section
+
+${longParagraph}
+`;
+    const chunks = chunkPolicy(doc, "long-para.md");
+    expect(chunks.length).toBeGreaterThan(1);
+
+    const bodies: string[] = [];
+    for (const c of chunks) {
+      const body = stripHeadingLine(c.text, "A Long Section");
+      // Every chunk body must start and end on a non-whitespace char, i.e.
+      // it was never cut mid-word (a mid-word cut would leave a body that
+      // still starts/ends cleanly, but the *reconstruction* check below is
+      // what actually catches split words; this assertion just rules out
+      // stray leading/trailing whitespace from the join).
+      expect(body).toMatch(/^\S[\s\S]*\S$/);
+      bodies.push(body);
+    }
+
+    // No word may appear split across two chunks: rejoining chunk bodies
+    // with a single space and normalizing whitespace must reproduce the
+    // original paragraph exactly (word-for-word).
+    const reconstructed = normalizeWhitespace(bodies.join(" "));
+    expect(reconstructed).toBe(normalizeWhitespace(longParagraph));
+  });
+
+  it("loses no text when reassembling chunks from a long fixture section", () => {
+    const { body } = parsePolicyDoc(DOC);
+    const exceptionsSection = body
+      .split(/\n(?=## )/)
+      .find((s) => s.startsWith("## 70.7 - Exceptions"))!;
+    const originalText = exceptionsSection.replace(/^## .+\n/, "").trim();
+
+    const chunks = chunkPolicy(DOC, "timely-filing.md");
+    const exceptionsChunks = chunks.filter((c) => c.text.includes("70.7 - Exceptions"));
+    expect(exceptionsChunks.length).toBeGreaterThan(1);
+
+    const reassembled = exceptionsChunks
+      .map((c) => stripHeadingLine(c.text, "70.7 - Exceptions"))
+      .join(" ");
+    expect(normalizeWhitespace(reassembled)).toBe(normalizeWhitespace(originalText));
+  });
 });
 
 describe("parseClaimsCsv", () => {
