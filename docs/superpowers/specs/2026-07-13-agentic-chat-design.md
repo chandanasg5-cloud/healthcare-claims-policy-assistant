@@ -167,7 +167,8 @@ Target coverage, mapped to the denial codes used in claims:
   - tool executors validate args and return model-readable errors.
 - Data tests: CSV parses; denial-code→policy coverage invariant; every policy doc
   has source-URL frontmatter.
-- Existing parse/format/retrieval tests unchanged.
+- Existing format tests unchanged; parse/retrieval tests are updated for the new
+  chunker and the real corpus (they currently assert `COV-002` sources).
 - Deploy verification: curl `/chat` with a multi-tool question; browser check of
   steps + sources rendering on the deployed site.
 
