@@ -2,7 +2,7 @@ import { api, Query } from "encore.dev/api";
 import { db } from "./db";
 import { ensureSeeded } from "./seed";
 import type { ClaimRow } from "./parse";
-import { askStream } from "./claude";
+import { askStream } from "./gemini";
 import { retrieve } from "./retrieval";
 import { formatClaim, policyContext } from "./format";
 
@@ -47,7 +47,7 @@ export async function getClaim(claimId: string): Promise<ClaimRow | null> {
 }
 
 // --- Streaming answer endpoints: SSE over api.raw (no generated client needed) ---
-// Each answers a POST with a small JSON body and streams Claude's reply as
+// Each answers a POST with a small JSON body and streams Gemini's reply as
 // Server-Sent Events: `data: {"text":"..."}\n\n` per delta. The browser consumes
 // these with plain fetch() + a ReadableStream reader.
 
@@ -72,7 +72,7 @@ async function streamAnswer(resp: any, userContent: string): Promise<void> {
 }
 
 // Wraps a streaming handler so the SSE response is ALWAYS ended — even if the
-// body is malformed or Claude errors mid-stream — otherwise the connection hangs.
+// body is malformed or Gemini errors mid-stream — otherwise the connection hangs.
 async function sseEndpoint(
   req: any,
   resp: any,

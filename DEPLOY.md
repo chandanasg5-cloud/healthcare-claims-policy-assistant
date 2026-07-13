@@ -21,7 +21,7 @@ client-generation step** — the frontend just needs the backend's URL.
    push to `main` and **auto-provisions Postgres**, applying `1_schema.up.sql`.
 4. Set the production secret (dashboard, or CLI):
    ```bash
-   cd backend && encore secret set --type prod AnthropicApiKey   # paste sk-ant-...
+   cd backend && encore secret set --type prod GeminiApiKey   # paste your Google AI Studio key
    ```
 5. Note the deployed API base URL (e.g. `https://<app>-<id>.encr.app`).
 

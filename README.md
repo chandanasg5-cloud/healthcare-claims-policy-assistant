@@ -24,7 +24,7 @@ Browser ──► Next.js (Vercel) ──fetch JSON + SSE──► Encore API �
                                                         │           (claims +
                                                         │            policy_chunks,
                                                         │            full-text tsvector)
-                                                        └──► Claude (claude-opus-4-8)
+                                                        └──► Gemini (gemini-2.5-flash)
 ```
 
 - **Retrieval** is Postgres **full-text search** (`tsvector` / `plainto_tsquery` /
@@ -43,7 +43,7 @@ Browser ──► Next.js (Vercel) ──fetch JSON + SSE──► Encore API �
 ## Tech stack
 
 TypeScript · Encore.ts · Postgres (full-text search) · Next.js · Tailwind ·
-Anthropic Claude (`claude-opus-4-8`) · Server-Sent Events
+Google Gemini (`gemini-2.5-flash`) · Server-Sent Events
 
 ## Local development
 
@@ -53,7 +53,7 @@ The backend needs a Postgres database. Encore provisions it locally **via Docker
 ```bash
 # Backend (requires Docker for the local DB)
 cd backend
-encore secret set --type local AnthropicApiKey   # paste your sk-ant-... key
+encore secret set --type local GeminiApiKey      # paste your Google AI Studio key
 encore run
 
 # Frontend (no Docker needed)
