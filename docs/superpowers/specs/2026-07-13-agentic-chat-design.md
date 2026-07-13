@@ -21,7 +21,11 @@ chat and fills the corpus gaps.
 - Multi-turn memory **within a browser session only** — no server-side persistence, no auth.
 - Tool steps are **visible** in the UI; retrieved policy excerpts appear in a
   collapsible sources panel.
-- Data grows to **~60 claims / ~10 patients / 6 policy docs**.
+- Data: **real CMS policy text + synthetic claims**. The retrieval corpus becomes
+  excerpts of real, public-domain CMS coverage policy (NCDs/LCDs and Medicare manual
+  chapters); claims stay synthetic (~60 / ~10 patients) but are authored to exercise
+  those real rules. Claim-level data with denials is PHI and not publicly available,
+  so synthetic claims are a necessity, and are labeled as such.
 - Architecture: **custom agent loop** (no agent framework, no new heavy deps).
 
 ## 1. Backend
@@ -80,7 +84,7 @@ One JSON object per `data:` line:
 
 ```
 {"type":"step","tool":"search_policies","label":"Searching policies: prior authorization"}
-{"type":"sources","chunks":[{"id":"COV-002.1","source":"COV-002-...md","text":"..."}]}
+{"type":"sources","chunks":[{"id":"IOM 100-04 ch.1 §70","source":"timely-filing.md","text":"..."}]}
 {"type":"text","text":"Claim CLM-"}
 {"type":"error","message":"..."}   // Gemini/API failure; stream ends after this
 {"type":"done"}                    // always the last event
@@ -109,17 +113,45 @@ into a case note.
   and parses the typed SSE events (reusing the current reader/decoder handling,
   including abort-on-unmount).
 
-## 3. Data expansion
+## 3. Data: real CMS policy corpus + synthetic claims
+
+### Policy corpus (real, public domain)
+
+The three authored `COV-00x` docs are replaced by a curated set of **real CMS policy
+excerpts** stored as markdown in `claims/data/policies/`, each with frontmatter
+recording title, real rule identifier scheme, source URL, and retrieval date.
+Target coverage, mapped to the denial codes used in claims:
+
+| Denial code | Real policy source |
+|---|---|
+| D-NMN (medical necessity) | LCD/NCD text for MRI brain and CT abdomen (e.g. MRI LCD; NCD 220.1 CT scans) |
+| D-EXP (experimental) | Medicare "reasonable and necessary" / non-covered NCD language |
+| D-NOAUTH, D-AUTHEXP | CMS prior-authorization program rules (hospital OPD prior auth) |
+| D-OON (out of network) | Medicare Managed Care Manual ch. 4 (out-of-network rules) |
+| D-TFL (timely filing) | Medicare Claims Processing Manual ch. 1 §70 (12-month timely filing) |
+| D-DUP (duplicate) | Claims Processing Manual duplicate-claim edit language |
+| Appeals (all codes) | CMS appeals process guidance (redetermination levels, deadlines, documentation) |
+
+- A one-time ingest script `scripts/fetch-policies.mjs` downloads the sources from
+  cms.gov, converts to markdown excerpts, and writes them with frontmatter. Curated
+  excerpts, not whole manuals: corpus target **8–12 docs, under ~100 KB total**, so
+  the embedded `data.ts` stays reasonable. The fetched markdown is committed; the
+  script exists so provenance is reproducible.
+- **Rule ids become real identifiers** (e.g. `NCD 220.1`, `IOM 100-04 ch.1 §70`);
+  the chunker keys chunks on the section headings of the real documents. `chunkPolicy`
+  is adapted as needed for the real docs' structure (plan-level detail).
+- CMS material is public domain; each doc's frontmatter cites its source URL and the
+  sources panel shows the document title.
+
+### Claims (synthetic by necessity)
 
 - `claims.csv`: ~60 claims, ~10 patients, dates across 2025, wider procedure mix,
-  plus one new denial code **D-TFL** (claim filed past timely-filing deadline).
-- New policy docs in `claims/data/policies/`:
-  - **COV-004 Network coverage** — in/out-of-network rules, OON reimbursement
-    exceptions (fixes the CLM-1005 gap).
-  - **COV-005 Appeals process** — deadlines, required documentation, appeal levels.
-  - **COV-006 Timely filing** — filing windows, D-TFL, exceptions.
+  plus new denial code **D-TFL**. Claims are authored so each denial is genuinely
+  governed by a rule in the real corpus (e.g. an MRI denied for a diagnosis the real
+  LCD does not list as an indication).
 - Invariant: **every denial code appearing in claims.csv is governed by at least one
-  policy rule**. A test enforces this.
+  policy chunk in the corpus**. A test enforces this.
+- README/data docs state plainly: policies are real CMS text; claims are synthetic.
 - `claims/data.ts` regenerated with `node scripts/gen-data.mjs` (deployed bundle
   cannot read loose files — see 2026-07-13 seed fix).
 
@@ -133,7 +165,8 @@ into a case note.
   - per-round tool-call cap rejects extras;
   - event ordering: steps/sources precede text, `done` is last;
   - tool executors validate args and return model-readable errors.
-- Data tests: CSV parses; denial-code→policy coverage invariant.
+- Data tests: CSV parses; denial-code→policy coverage invariant; every policy doc
+  has source-URL frontmatter.
 - Existing parse/format/retrieval tests unchanged.
 - Deploy verification: curl `/chat` with a multi-tool question; browser check of
   steps + sources rendering on the deployed site.
