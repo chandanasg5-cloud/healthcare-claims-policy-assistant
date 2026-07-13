@@ -6,3 +6,5 @@ __pycache__/
 .DS_Store
 node_modules/
 .vercel/
+.superpowers/
+backend/claims/data/sources/

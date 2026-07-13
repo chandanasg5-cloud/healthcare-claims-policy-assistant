@@ -1,0 +1,49 @@
+{
+  "retrieved": "2026-07-13",
+  "sources": [
+    {
+      "file": "ncd-220-2-mri.md",
+      "title": "NCD 220.2 Magnetic Resonance Imaging",
+      "url": "https://www.cms.gov/regulations-and-guidance/guidance/transmittals/downloads/r21ncd.pdf",
+      "note": "medicare-coverage-database/view/ncd.aspx?ncdid=177 returned HTTP 503 on fetch; substituted the CMS Manual System transmittal (Pub. 100-03, Transmittal 21) that publishes the same NCD 220.2 section text."
+    },
+    {
+      "file": "ncd-220-1-ct.md",
+      "title": "NCD 220.1 Computed Tomography",
+      "url": "https://www.cms.gov/regulations-and-guidance/guidance/transmittals/downloads/r85ncd.pdf",
+      "note": "medicare-coverage-database/view/ncd.aspx?ncdid=176 returned HTTP 503 on fetch; substituted the CMS Manual System transmittal (Pub. 100-03, Transmittal 85) that publishes the same NCD 220.1 section text."
+    },
+    {
+      "file": "reasonable-and-necessary.md",
+      "title": "Medicare Program Integrity Manual ch.13 – Reasonable and Necessary Provisions in LCDs",
+      "url": "https://www.cms.gov/regulations-and-guidance/guidance/manuals/downloads/pim83c13.pdf",
+      "note": "Substituted for bp102c16.pdf (Benefit Policy Manual ch.16): ch.16 §20 covers 'not reasonable and necessary' exclusions but its running text does not contain 'investigational' language. Program Integrity Manual ch.13 §13.5.4 is the CMS source that defines 'reasonable and necessary' including the 'not experimental or investigational' criterion."
+    },
+    {
+      "file": "prior-authorization-opd.md",
+      "title": "Prior Authorization Process for Certain Hospital Outpatient Department (OPD) Services – Operational Guide",
+      "url": "https://www.cms.gov/files/document/opd-operational-guide.pdf",
+      "note": "The landing page URL in the original brief (research-statistics-data-systems/.../prior-authorization-certain-hospital-outpatient-department-opd-services) now 404s; CMS moved it under data-research/monitoring-programs/... Substituted the OPD Operational Guide PDF linked from the current landing page, which contains the provisional-affirmation and validity-period language directly."
+    },
+    {
+      "file": "out-of-network.md",
+      "title": "Medicare Managed Care Manual ch.4",
+      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/mc86c04.pdf"
+    },
+    {
+      "file": "timely-filing.md",
+      "title": "Medicare Claims Processing Manual ch.1 (Timely Filing)",
+      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c01.pdf"
+    },
+    {
+      "file": "claim-edits.md",
+      "title": "Medicare Claims Processing Manual (Duplicate Claims / Coding Edits)",
+      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c01.pdf"
+    },
+    {
+      "file": "appeals-redeterminations.md",
+      "title": "Medicare Claims Processing Manual ch.29 (Appeals)",
+      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c29.pdf"
+    }
+  ]
+}
