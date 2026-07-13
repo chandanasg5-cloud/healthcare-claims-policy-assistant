@@ -13,9 +13,8 @@ retrieved: 2026-07-13
 Medicare regulations at 42 CFR 424.44 define the timely filing period for Medicare fee for
 service claims. In general, such claims must be filed to the appropriate Medicare claims
 processing contractor no later than 12 months, or 1 calendar year, after the date the
-services were furnished. In practice, this means a claim must reach the contractor within
-12 calendar months of the date of service or it is denied as untimely. (See section 70.7
-below for details of the exceptions to the 12 month timely filing limit.)
+services were furnished. (See section 70.7 below for details of the exceptions to the 12
+month timely filing limit.)
 
 ## 70.1 - Determining Start Date of Timely Filing Period -- Date of Service
 
