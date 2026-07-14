@@ -15,15 +15,17 @@
     },
     {
       "file": "reasonable-and-necessary.md",
-      "title": "Medicare Program Integrity Manual ch.13 – Reasonable and Necessary Provisions in LCDs",
+      "title": "Medicare Program Integrity Manual ch.13 \u2013 Reasonable and Necessary Provisions in LCDs",
       "url": "https://www.cms.gov/regulations-and-guidance/guidance/manuals/downloads/pim83c13.pdf",
-      "note": "Substituted for bp102c16.pdf (Benefit Policy Manual ch.16): ch.16 §20 covers 'not reasonable and necessary' exclusions but its running text does not contain 'investigational' language. Program Integrity Manual ch.13 §13.5.4 is the CMS source that defines 'reasonable and necessary' including the 'not experimental or investigational' criterion."
+      "note": "Substituted for bp102c16.pdf (Benefit Policy Manual ch.16): ch.16 \u00a720 covers 'not reasonable and necessary' exclusions but its running text does not contain 'investigational' language. Program Integrity Manual ch.13 \u00a713.5.4 is the CMS source that defines 'reasonable and necessary' including the 'not experimental or investigational' criterion.",
+      "notes": "Curation edit: in the \u00a713.5.3 excerpt, two of the source's bulleted evidentiary-content items ('a complete description of the item or service under review'; 'a narrative that describes the scientific evidence supporting the clinical indications for the item or service') are joined into one prose sentence with 'and'; the item text itself is verbatim."
     },
     {
       "file": "prior-authorization-opd.md",
-      "title": "Prior Authorization Process for Certain Hospital Outpatient Department (OPD) Services – Operational Guide",
+      "title": "Prior Authorization Process for Certain Hospital Outpatient Department (OPD) Services \u2013 Operational Guide",
       "url": "https://www.cms.gov/files/document/opd-operational-guide.pdf",
-      "note": "The landing page URL in the original brief (research-statistics-data-systems/.../prior-authorization-certain-hospital-outpatient-department-opd-services) now 404s; CMS moved it under data-research/monitoring-programs/... Substituted the OPD Operational Guide PDF linked from the current landing page, which contains the provisional-affirmation and validity-period language directly."
+      "note": "The landing page URL in the original brief (research-statistics-data-systems/.../prior-authorization-certain-hospital-outpatient-department-opd-services) now 404s; CMS moved it under data-research/monitoring-programs/... Substituted the OPD Operational Guide PDF linked from the current landing page, which contains the provisional-affirmation and validity-period language directly.",
+      "notes": "Curation edit history: \u00a72.1 originally condensed the source's service list into one synthesized sentence; replaced (post-review) with the source's verbatim sentences ('CMS added Facet Joint Interventions... This service category will be in addition to the existing list of services requiring prior authorization, which are blepharoplasty, botulinum toxin injection, rhinoplasty, panniculectomy, vein ablation, implanted neurostimulators, and cervical fusion with disc removal.'). In \u00a78.1, three source bullets are joined into prose sentences; bullet text itself is verbatim."
     },
     {
       "file": "out-of-network.md",
@@ -43,7 +45,8 @@
     {
       "file": "appeals-redeterminations.md",
       "title": "Medicare Claims Processing Manual ch.29 (Appeals)",
-      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c29.pdf"
+      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c29.pdf",
+      "notes": "Curation edit: the source's \u00a7310.4 timeframe chart (redetermination filing and decision deadlines) is presented as prose sentences preserving the chart's exact values (120-day filing limit, 60-day decision timeframe); all other text is verbatim."
     }
   ]
 }

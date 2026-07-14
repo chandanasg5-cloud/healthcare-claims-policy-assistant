@@ -30,12 +30,28 @@ Exact duplicates are controlled by the claims processing system through "hard co
 edits, and may not be user-controlled. In addition, Medicare contractors cannot override
 or bypass exact duplicate edits.
 
+Claims or claim lines that have been determined to be an exact duplicate are rejected and
+do not have appeal rights. An exact duplicate for institutional claims is a claim or claim
+line that exactly matches another claim or claim line with respect to the following
+elements: Medicare beneficiary identifier; Type of Bill; Provider Identification Number;
+From Date of Service; Through Date of Service; Total Charges (on the line or on the
+bill); and HCPCS, CPT-4, or Procedure Code modifiers.
+
 Claims or claim lines that have been determined to be exact duplicates of another claim
 or claim line are denied. An exact duplicate for physician and other supplier claims
 submitted to a MAC or carrier is a claim or claim line that exactly matches another claim
 or claim line with respect to the following elements: Medicare beneficiary identifier;
 Provider Number; From Date of Service; Through Date of Service; Type of Service;
 Procedure Code; Place of Service; and Billed Amount.
+
+Whenever any of the following claim situations occur, the MAC develops procedures to
+prevent duplicate payment of claims. This includes, but is not limited to: outpatient
+payment is claimed where the date of service is totally within inpatient dates of service at
+the same or another provider; outpatient bill is submitted for services on the day of an
+inpatient admission or the day before the day of admission to the same hospital;
+outpatient bill overlaps an inpatient admission period; outpatient bill for services matches
+another outpatient bill with a service date for the same revenue code at the same provider
+or under a different provider number.
 
 ## 120.3 - Suspect Duplicates
 
@@ -45,6 +61,15 @@ Suspect duplicates are claims or claim lines that contain closely-aligned elemen
 sufficient to suggest that duplication may be present and, as such, require that the suspect
 claim be reviewed. Suspect duplicate edits can be hard coded in the system or local edits
 set up by Medicare contractors.
+
+A "suspect duplicate" claim is a claim being processed which, when compared to the
+history or pending file, begins with these characteristics: match on the beneficiary
+information; match on provider identification, and same date of service or overlapping
+dates of service. The contractors examine and compare to the prior bill any bill that is
+identified as a suspect duplicate. If the services (revenue or HCPCS codes) on a claim
+duplicate the services for the other, contractors should check the diagnosis. If the
+diagnosis codes are duplicates, obtain an explanation from the provider before making
+payment.
 
 ## 80.3.2 - Handling Incomplete or Invalid Claims (Diagnosis Coding)
 

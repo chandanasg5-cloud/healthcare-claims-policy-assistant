@@ -52,3 +52,50 @@ coverage, limited coverage, maintenance of existing coverage in cases of LCD
 reconsideration or non-coverage. At a minimum, the summary should include a complete
 description of the item or service under review and a narrative that describes the
 scientific evidence supporting the clinical indications for the item or service.
+
+## 13.2.3 - Clinical Guidelines, Consensus Documents and Consultation
+
+(Rev. 863; Issued: 02-12-19; Effective: 10-03-18; Implementation: 01-08-19)
+
+Prior to drafting and during the development of an LCD, if available the MACs shall
+supplement their research (see section 13.5.3) with clinical guidelines, consensus
+documents or consultation by experts (recognized authorities in the field), medical
+associations or other health care professionals for an advisory opinion, when applicable.
+Acceptance by individual health care providers, or even a limited group of health care
+providers, does not indicate general acceptance of the item or service by the medical
+community.
+
+## 13.2.2.3 - New LCD Request Requirements
+
+(Rev. 863; Issued: 02-12-19; Effective: 10-03-18; Implementation: 01-08-19)
+
+Contractors shall consider New LCD Requests to be a complete, formal request if the
+following are met:
+
+- The request is in writing and can be sent to the MAC via e-mail, facsimile or written
+  letter;
+- The request clearly identifies the statutorily-defined Medicare benefit category to
+  which the requestor believes the item or service falls under and provides a rationale
+  justifying the assignment;
+- The request shall include a justification supported by peer-reviewed evidence. Full
+  copies of published evidence to be considered shall be included and failure to include
+  same invalidates the request;
+- The request shall include information that addresses the relevance, usefulness,
+  clinical health outcomes, or the medical benefits of the item or service; and
+- The request shall include information that fully explains the design, purpose, and/or
+  method, as appropriate, of using the item or service for which the request is made.
+
+A valid request response does not convey that a determination has been made whether or
+not the item or service will be covered or non-covered under 1862(a)(1)(A) of the Act.
+
+## 13.5.1 - General Requirements
+
+(Rev. 863; Issued: 02-12-19; Effective: 10-03-18; Implementation: 01-08-19)
+
+The MAC shall ensure that all LCDs do not conflict with all statutes, rulings, regulations,
+and national coverage, payment, and coding policies. For all new and revised LCDs
+MACs shall no longer include national policy language found in statute, regulations,
+rulings, interpretive manual instructions, etc. in the coverage and indications section of
+their LCDs. If contractors need to reference a national policy in the coverage and
+indications section of their LCD, they shall cite the reference (e.g. publication number,
+Medicare title of manual, section of manual) without reiterating the text from the policy.

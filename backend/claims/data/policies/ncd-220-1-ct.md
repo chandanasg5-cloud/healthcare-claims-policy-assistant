@@ -46,6 +46,38 @@ which payment is requested has been performed on equipment that meets the follow
 criteria: the model must be known to the Food and Drug Administration (FDA), and must
 be in the full market release phase of development.
 
+## Mobile CT Equipment
+
+CT scans performed on mobile units are subject to the same Medicare coverage
+requirements applicable to scans performed on stationary units, as well as certain health
+and safety requirements recommended by the Health Resources and Services
+Administration. As with scans performed on stationary units, the scans must be
+determined medically necessary for the individual patient. The scans must be performed
+on types of CT scanning equipment that have been approved for use as stationary units,
+and must be in compliance with applicable State laws and regulations for control of
+radiation.
+
+If mobile CT scan services are furnished at an ambulatory health care facility other than
+a hospital-based facility, e.g., a freestanding physician-directed clinic, the diagnostic
+procedure must be performed by, or under the direct personal supervision of, a
+radiologist or other qualified physician. In addition, the facility must maintain a record of
+the attending physician's order for a scan performed on a mobile unit.
+
+Evidence of compliance with applicable State laws and regulations for control of
+radiation should be requested from owners of mobile CT scan units upon receipt of the
+first claims. All mobile scan claims should be reviewed very carefully in accordance with
+instructions applicable to scans performed on fixed units, with particular emphasis on the
+medical necessity for scans performed in an ambulatory setting.
+
+## Multi-Planar Diagnostic Imaging (MPDI)
+
+In usual CT scanning procedures, a series of transverse or axial images are reproduced.
+These transverse images are routinely translated into coronal and/or sagittal views. MPDI
+is a process which further translates the data produced by CT scanning by providing
+reconstructed oblique images which can contribute to diagnostic information. MPDI, also
+known as planar image reconstruction or reformatted imaging, is covered under Medicare
+when provided as a service to an entity performing a covered CT scan.
+
 ## Computed Tomographic Angiography (CTA)
 
 CTA is a general phrase used to describe a non-invasive method, using intravenous

@@ -32,9 +32,18 @@ non-affirmation, as many times as necessary to achieve an affirmation decision.
 
 ## 2.1 - OPD Services That Require Prior Authorization
 
-Services requiring prior authorization include blepharoplasty, botulinum toxin injection,
-rhinoplasty, panniculectomy, vein ablation, implanted neurostimulators, cervical fusion
-with disc removal, and Facet Joint Interventions.
+CMS added Facet Joint Interventions to the nationwide prior authorization process for
+hospital OPD services. OPD providers can start submitting PARs on June 15, 2023, for
+dates of service on or after July 1, 2023. This service category will be in addition to the
+existing list of services requiring prior authorization, which are blepharoplasty,
+botulinum toxin injection, rhinoplasty, panniculectomy, vein ablation, implanted
+neurostimulators, and cervical fusion with disc removal.
+
+The addition of new services to the Prior Authorization program does not change
+Medicare benefit or coverage requirements, nor does it create new documentation
+requirements. The documentation required to be included with a prior authorization
+request is information that hospital OPDs are regularly required to maintain for Medicare
+payments.
 
 ## 4 - Review of the PAR
 
@@ -44,6 +53,26 @@ the provider if it is decided that applicable Medicare coverage, coding, and pay
 are met. A non-affirmation will be issued to the provider if it is decided that applicable
 Medicare coverage, coding, and payment rules are not met. A unique tracking number
 (UTN) will be assigned to each PAR.
+
+## 4.1 - Review Decisions and Timeframes
+
+The timeframes for conducting PA of certain hospital OPD services will be dependent
+upon the service(s) selected and documentation submitted for PAR. There are 3 types of
+review timeframes:
+
+- Initial Submission — the first PAR sent to the contractor for review and decision. The
+  MAC will complete its review of medical records and send an initial decision letter
+  that is either postmarked or faxed within 7 calendar days following the receipt of the
+  initial request.
+- Resubmission — any subsequent resubmissions to correct an error or omission
+  identified during a PA decision. The MAC will postmark or fax notification of the
+  decision of these resubmitted requests to the provider or beneficiary within 7 calendar
+  days of receipt of the resubmission request.
+- Expedited — a PA decision that is performed on an accelerated timeframe based on
+  the MAC determination that delays in review and response could jeopardize the life or
+  health of the beneficiary. If the MAC substantiates the need for an expedited decision,
+  the MAC will make reasonable efforts to communicate a decision within 2 business
+  days of receipt of the expedited request.
 
 ## 4.1.1 - Validation Period for Prior Authorization Decisions
 
@@ -56,3 +85,39 @@ Otherwise, the provider will need to submit a new PAR.
 
 A provider may resubmit a PAR an unlimited number of times upon receipt of a
 non-affirmative decision. The UTN will be assigned with each PA resubmission request.
+
+## 4.1.3 - Rejected PAR
+
+A prior authorization request is rejected when the MAC is unable to process the request
+due to incomplete or invalid information. The MAC will notify the submitter that their
+request was rejected and the reason why. Rejected prior authorization requests are not
+reviewed for medical necessity and are not considered non-affirmations. When a prior
+authorization request is rejected, the submitter should review the reason listed in the
+rejection letter. The submitter may then correct the error and submit the request again
+using the same submission procedures.
+
+## 7.1 - Provisional Affirmation PA Decision
+
+A provisional affirmation PA decision is a preliminary finding that a future claim
+submitted to Medicare for the service(s) likely meets Medicare's coverage, coding, and
+payment requirements. The provisional affirmation PA decision is valid for 120 days
+from the date decision was made.
+
+## 7.2 - Non-Affirmation PA Decision
+
+A non-affirmation PA decision is a preliminary finding that if a future claim is submitted
+to Medicare for the requested service does not likely meet Medicare's coverage, coding,
+and payment requirements. The MAC will provide the PAR requester with notification of
+what required documentation is missing or noncompliant with Medicare requirements
+via fax, mail, or the MAC provider portal (when available).
+
+## 8.1 - Affirmed PA Decision on File
+
+Note: If all Medicare coverage, coding, and payment requirements are met, the claim
+will likely be paid. Claims receiving a provisional affirmation may be denied based on
+either of the following: technical requirements that can only be evaluated after the claim
+has been submitted for formal processing; or information was not available at the time of
+the PAR. We note claims for which there is a provisional affirmation PA decision will be
+afforded some protection from future audits, both pre- and postpayment; however,
+review contractors may audit claims if potential fraud, inappropriate utilization, or
+changes in billing patterns are identified.

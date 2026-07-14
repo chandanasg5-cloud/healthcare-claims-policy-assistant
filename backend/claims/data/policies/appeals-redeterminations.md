@@ -56,8 +56,20 @@ representative of the party.
 
 A party must file a redetermination request within 120 days of the date of receipt of the
 notice of initial determination (MSN or RA) with the contractor indicated on the notice of
-initial determination. The contractor may extend the period for filing if it finds the party
-had good cause for not requesting the redetermination timely.
+initial determination. The date of filing for requests filed in writing is defined as the date
+received by the appropriate contractor in the corporate mailroom, the date received via
+facsimile, or the date received in the secure Internet portal/application, as evidenced by
+the receiving office's date stamp on the request.
+
+When the filing deadline for a redetermination ends on a Saturday, Sunday, legal holiday,
+or any other nonwork day, the contractor shall apply a rollover period that extends the
+filing deadline to the first working day after the Saturday, Sunday, legal holiday, or other
+nonwork day.
+
+The contractor may extend the period for filing if it finds the party had good cause for not
+requesting the redetermination timely. If the contractor finds that the party did not have
+good cause for failing to request a redetermination in a timely manner, it may, at its
+discretion, consider reopening.
 
 ## 310.4 - The Redetermination
 
@@ -65,3 +77,19 @@ had good cause for not requesting the redetermination timely.
 
 The contractor must complete and mail a redetermination notice for all requests for
 redetermination within 60 days of receipt of the request.
+
+## 310.5 - The Redetermination Decision
+
+(Rev. 3549, Issued: 06-24-16, Effective: 07-26-16, Implementation: 07-26-16)
+
+The law requires contractors to conclude and mail and/or otherwise transmit the
+redetermination decision within 60 days of receipt of the appellant's request, as indicated
+in section 310.4. For unfavorable redeterminations, the contractor mails the decision letter
+to the appellant, and mails copies to each party to the initial determination (or the party's
+authorized representative and/or appointed representative, if applicable).
+
+For partially favorable redeterminations, the contractor mails and/or otherwise transmits
+the decision letter, and an adjusted MSN or RA to the appellant. For fully favorable
+redeterminations, the contractor mails or otherwise transmits an MSN or RA reflecting
+the adjustment action to each party (or the party's authorized representative, if applicable)
+on the next scheduled release.
