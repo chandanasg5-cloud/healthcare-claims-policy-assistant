@@ -24,8 +24,8 @@ describe("formatClaim", () => {
 
 describe("policyContext", () => {
   it("labels each excerpt with its source", () => {
-    const ctx = policyContext([{ source: "COV-002.md", text: "rule text" }]);
-    expect(ctx).toContain("[COV-002.md]");
+    const ctx = policyContext([{ id: "timely-filing.md#0", source: "timely-filing.md", text: "rule text" }]);
+    expect(ctx).toContain("[timely-filing.md]");
     expect(ctx).toContain("rule text");
   });
 });
