@@ -58,7 +58,8 @@ async function sseEndpoint(
       return;
     }
     await handler(body);
-  } catch {
+  } catch (err) {
+    console.error("chat stream failed:", err);
     sseSend(resp, { type: "error", message: "Sorry, an error occurred while generating the answer." });
   } finally {
     sseSend(resp, { type: "done" });
