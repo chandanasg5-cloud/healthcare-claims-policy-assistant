@@ -60,9 +60,11 @@ export async function* chatStream(
   model: ModelClient,
   runTool: ToolRunner,
 ): AsyncGenerator<AgentEvent> {
-  const contents: GenContent[] = history
-    .slice(-HISTORY_LIMIT)
-    .map((m) => ({ role: m.role, parts: [{ text: m.text }] }));
+  // Truncate, then drop any leading model turns the cut exposed — Gemini
+  // expects conversations to open with a user message.
+  const recent = history.slice(-HISTORY_LIMIT);
+  while (recent.length > 0 && recent[0].role === "model") recent.shift();
+  const contents: GenContent[] = recent.map((m) => ({ role: m.role, parts: [{ text: m.text }] }));
 
   for (let round = 1; round <= MAX_ROUNDS; round++) {
     const isLastRound = round === MAX_ROUNDS;

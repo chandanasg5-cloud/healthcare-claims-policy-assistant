@@ -35,18 +35,20 @@
     {
       "file": "timely-filing.md",
       "title": "Medicare Claims Processing Manual ch.1 (Timely Filing)",
-      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c01.pdf"
+      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c01.pdf",
+      "notes": "Curation edit: the \u00a770.4 excerpt shortens one source sentence by omitting its parenthetical about requests that would have been timely with provider action; both retained halves are verbatim."
     },
     {
       "file": "claim-edits.md",
       "title": "Medicare Claims Processing Manual (Duplicate Claims / Coding Edits)",
-      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c01.pdf"
+      "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c01.pdf",
+      "notes": "Curation edit: \u00a7120.2/\u00a7120.3 join the source's bulleted duplicate-claim criteria into prose; bullet text is verbatim with only case changes at join seams."
     },
     {
       "file": "appeals-redeterminations.md",
       "title": "Medicare Claims Processing Manual ch.29 (Appeals)",
       "url": "https://www.cms.gov/Regulations-and-Guidance/Guidance/Manuals/Downloads/clm104c29.pdf",
-      "notes": "Curation edit: the source's \u00a7310.4 timeframe chart (redetermination filing and decision deadlines) is presented as prose sentences preserving the chart's exact values (120-day filing limit, 60-day decision timeframe); all other text is verbatim."
+      "notes": "Curation edit: the source's \u00a7220 timeframe chart (CHART 1) (redetermination filing and decision deadlines) is presented as prose sentences preserving the chart's exact values (120-day filing limit, 60-day decision timeframe); all other text is verbatim."
     }
   ]
 }

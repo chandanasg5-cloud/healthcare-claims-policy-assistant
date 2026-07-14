@@ -110,4 +110,16 @@ describe("chatStream", () => {
     expect(model.seen[0].length).toBe(HISTORY_LIMIT);
     expect(JSON.stringify(model.seen[0][0])).toContain("m10");
   });
+
+  it("drops leading model turns exposed by truncation so contents open with a user message", async () => {
+    // 21 alternating messages ending with user: slice(-20) starts on a model turn.
+    const long = Array.from({ length: 21 }, (_, i) => ({
+      role: (i % 2 === 0 ? "user" : "model") as "user" | "model",
+      text: `m${i}`,
+    }));
+    const model = fakeModel([[{ text: "ok" }]]);
+    await drain(chatStream(long, model, echoTool));
+    expect(model.seen[0].length).toBe(HISTORY_LIMIT - 1);
+    expect(model.seen[0][0].role).toBe("user");
+  });
 });

@@ -25,9 +25,16 @@ export const listClaims = api(
 // The client POSTs {messages:[{role,text}...]} and receives typed events, one
 // JSON object per `data:` line: step | sources | text | error | done.
 
+const MAX_BODY_BYTES = 64 * 1024;
+
 async function readJsonBody(req: any): Promise<any> {
   const chunks: Buffer[] = [];
-  for await (const c of req) chunks.push(c as Buffer);
+  let total = 0;
+  for await (const c of req) {
+    total += (c as Buffer).length;
+    if (total > MAX_BODY_BYTES) throw new Error("request body too large");
+    chunks.push(c as Buffer);
+  }
   const raw = Buffer.concat(chunks).toString("utf-8");
   return raw ? JSON.parse(raw) : {};
 }
