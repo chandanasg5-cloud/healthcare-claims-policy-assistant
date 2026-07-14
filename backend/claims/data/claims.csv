@@ -1,13 +1,61 @@
 claim_id,patient_id,date_of_service,procedure_code,procedure_desc,diagnosis_code,billed_amount,status,denial_code,denial_reason
 CLM-1001,PAT-001,2025-01-15,99396,Annual wellness visit,Z00.00,250.00,approved,,
-CLM-1002,PAT-001,2025-06-20,99396,Annual wellness visit,Z00.00,250.00,denied,D-DUP,Second wellness visit in same calendar year
-CLM-1003,PAT-002,2025-02-10,70551,MRI brain,G43.909,1800.00,denied,D-NOAUTH,No prior authorization on file
-CLM-1004,PAT-002,2025-03-05,74177,CT abdomen,R10.9,1200.00,approved,,
-CLM-1005,PAT-003,2025-04-12,99385,Annual wellness visit,Z00.00,230.00,denied,D-OON,Provider out of network
-CLM-1006,PAT-004,2025-05-01,70551,MRI brain,G43.909,1800.00,denied,D-AUTHEXP,Authorization expired before service date
-CLM-1007,PAT-005,2025-05-18,29826,Shoulder arthroscopy,M75.100,4200.00,denied,D-NMN,Diagnosis does not support medical necessity
-CLM-1008,PAT-006,2025-06-02,0345T,Experimental cardiac procedure,I25.10,9500.00,denied,D-EXP,Experimental or investigational service
-CLM-1009,PAT-003,2025-07-09,74177,CT abdomen,R10.31,1200.00,denied,D-NOAUTH,No prior authorization on file
+CLM-1002,PAT-001,2025-06-20,99396,Annual wellness visit,Z00.00,250.00,denied,D-DUP,Duplicate of a claim already processed for the same service and date span
+CLM-1003,PAT-002,2025-02-10,70551,MRI brain without contrast,G43.909,1800.00,denied,D-NOAUTH,No prior authorization on file for service requiring prior authorization
+CLM-1004,PAT-002,2025-03-05,74177,CT abdomen and pelvis with contrast,R10.9,1200.00,approved,,
+CLM-1005,PAT-003,2025-04-12,99385,Annual wellness visit,Z00.00,230.00,denied,D-OON,Provider is out of network and no exception applies
+CLM-1006,PAT-004,2025-05-01,70551,MRI brain without contrast,G43.909,1800.00,denied,D-AUTHEXP,Prior authorization expired before the date of service
+CLM-1007,PAT-005,2025-05-18,29826,Shoulder arthroscopy subacromial decompression,M75.100,4200.00,denied,D-NMN,Documentation does not establish medical necessity
+CLM-1008,PAT-006,2025-06-02,0345T,Transcatheter mitral valve repair (investigational use),I25.10,9500.00,denied,D-EXP,Experimental or investigational service is excluded from coverage
+CLM-1009,PAT-003,2025-07-09,74177,CT abdomen and pelvis with contrast,R10.31,1200.00,denied,D-NOAUTH,No prior authorization on file for service requiring prior authorization
 CLM-1010,PAT-002,2025-08-21,99396,Annual wellness visit,Z00.00,250.00,approved,,
-CLM-1011,PAT-007,2025-09-03,70551,MRI brain,G44.209,1800.00,denied,D-NOAUTH,No prior authorization on file
-CLM-1012,PAT-005,2025-09-15,99213,Office visit,J06.9,140.00,denied,D-CODE,Invalid or unspecified diagnosis coding
+CLM-1011,PAT-007,2025-09-03,70551,MRI brain without contrast,G44.209,1800.00,denied,D-NOAUTH,No prior authorization on file for service requiring prior authorization
+CLM-1012,PAT-005,2025-09-15,99213,Office visit established patient,J06.9,140.00,denied,D-CODE,Diagnosis code invalid or not coded to highest specificity
+CLM-1013,PAT-001,2025-02-03,93000,Electrocardiogram routine,I10,95.00,approved,,
+CLM-1014,PAT-001,2025-03-14,80053,Comprehensive metabolic panel,E11.9,48.00,approved,,
+CLM-1015,PAT-001,2025-09-30,72148,MRI lumbar spine without contrast,M54.50,1650.00,denied,D-NMN,Imaging not supported by documented conservative treatment
+CLM-1016,PAT-001,2025-11-12,99214,Office visit established patient,E11.9,185.00,approved,,
+CLM-1017,PAT-002,2025-04-18,99213,Office visit established patient,G43.909,140.00,approved,,
+CLM-1018,PAT-002,2025-10-05,70553,MRI brain with and without contrast,R51.9,2100.00,denied,D-NMN,Headache diagnosis does not meet imaging coverage indications
+CLM-1019,PAT-002,2025-11-20,85025,Complete blood count,D64.9,32.00,approved,,
+CLM-1020,PAT-003,2025-01-28,99203,Office visit new patient,Z00.00,175.00,approved,,
+CLM-1021,PAT-003,2025-08-14,66984,Cataract surgery with IOL insertion,H25.11,3400.00,approved,,
+CLM-1022,PAT-003,2025-10-22,92134,Retinal OCT imaging,H35.30,210.00,denied,D-TFL,Claim received more than 12 months after the date of service
+CLM-1023,PAT-004,2025-01-09,99385,Annual wellness visit,Z00.00,230.00,approved,,
+CLM-1024,PAT-004,2025-03-27,72148,MRI lumbar spine without contrast,M54.16,1650.00,denied,D-NOAUTH,No prior authorization on file for service requiring prior authorization
+CLM-1025,PAT-004,2025-06-30,64483,Epidural steroid injection lumbar,M54.16,890.00,denied,D-NMN,Injection frequency exceeds coverage guidelines without documented benefit
+CLM-1026,PAT-004,2025-08-08,99214,Office visit established patient,M54.16,185.00,approved,,
+CLM-1027,PAT-004,2025-12-02,80053,Comprehensive metabolic panel,E78.5,48.00,denied,D-DUP,Duplicate of a claim already processed for the same service and date span
+CLM-1028,PAT-005,2025-02-21,73721,MRI knee without contrast,M23.205,1500.00,denied,D-NOAUTH,No prior authorization on file for service requiring prior authorization
+CLM-1029,PAT-005,2025-07-11,29881,Knee arthroscopy with meniscectomy,M23.205,3800.00,approved,,
+CLM-1030,PAT-005,2025-11-05,97110,Physical therapy therapeutic exercise,M25.561,120.00,approved,,
+CLM-1031,PAT-006,2025-01-17,99204,Office visit new patient,I25.10,260.00,approved,,
+CLM-1032,PAT-006,2025-03-08,93458,Cardiac catheterization left heart,I25.10,5200.00,approved,,
+CLM-1033,PAT-006,2025-07-25,0715T,Percutaneous coronary lithotripsy (investigational),I25.10,8800.00,denied,D-EXP,Experimental or investigational service is excluded from coverage
+CLM-1034,PAT-006,2025-10-19,80061,Lipid panel,E78.5,42.00,denied,D-TFL,Claim received more than 12 months after the date of service
+CLM-1035,PAT-007,2025-02-14,99385,Annual wellness visit,Z00.00,230.00,approved,,
+CLM-1036,PAT-007,2025-05-23,74177,CT abdomen and pelvis with contrast,K57.30,1200.00,denied,D-AUTHEXP,Prior authorization expired before the date of service
+CLM-1037,PAT-007,2025-08-29,45378,Diagnostic colonoscopy,K57.30,1450.00,approved,,
+CLM-1038,PAT-007,2025-12-10,99213,Office visit established patient,K57.30,140.00,denied,D-CODE,Diagnosis code invalid or not coded to highest specificity
+CLM-1039,PAT-008,2025-01-30,99203,Office visit new patient,M17.11,175.00,approved,,
+CLM-1040,PAT-008,2025-04-07,73721,MRI knee without contrast,M17.11,1500.00,denied,D-NMN,Osteoarthritis staging does not require MRI under coverage policy
+CLM-1041,PAT-008,2025-06-16,20610,Knee joint injection,M17.11,240.00,approved,,
+CLM-1042,PAT-008,2025-09-24,27447,Total knee arthroplasty,M17.11,28500.00,denied,D-NOAUTH,No prior authorization on file for service requiring prior authorization
+CLM-1043,PAT-008,2025-11-30,97110,Physical therapy therapeutic exercise,Z47.1,120.00,denied,D-OON,Provider is out of network and no exception applies
+CLM-1044,PAT-009,2025-02-06,99385,Annual wellness visit,Z00.00,230.00,approved,,
+CLM-1045,PAT-009,2025-04-29,76700,Abdominal ultrasound complete,R10.9,320.00,approved,,
+CLM-1046,PAT-009,2025-07-17,74177,CT abdomen and pelvis with contrast,R10.9,1200.00,denied,D-NMN,Ultrasound findings do not support advanced imaging necessity
+CLM-1047,PAT-009,2025-09-08,43239,Upper GI endoscopy with biopsy,K21.9,1900.00,denied,D-OON,Provider is out of network and no exception applies
+CLM-1048,PAT-009,2025-12-18,99214,Office visit established patient,K21.9,185.00,approved,,
+CLM-1049,PAT-010,2025-01-22,99396,Annual wellness visit,Z00.00,250.00,approved,,
+CLM-1050,PAT-010,2025-03-19,77067,Screening mammography bilateral,Z12.31,290.00,approved,,
+CLM-1051,PAT-010,2025-06-05,77065,Diagnostic mammography unilateral,N63.10,340.00,denied,D-DUP,Duplicate of a claim already processed for the same service and date span
+CLM-1052,PAT-010,2025-08-13,19083,Breast biopsy with ultrasound guidance,N63.10,1750.00,approved,,
+CLM-1053,PAT-010,2025-10-27,0042T,Cerebral perfusion analysis (investigational),I67.9,2300.00,denied,D-EXP,Experimental or investigational service is excluded from coverage
+CLM-1054,PAT-010,2025-12-22,99213,Office visit established patient,N63.10,140.00,denied,D-TFL,Claim received more than 12 months after the date of service
+CLM-1055,PAT-003,2025-05-30,70551,MRI brain without contrast,R51.9,1800.00,denied,D-NMN,Headache diagnosis does not meet imaging coverage indications
+CLM-1056,PAT-006,2025-05-09,99215,Office visit established patient high complexity,I50.9,240.00,approved,,
+CLM-1057,PAT-008,2025-02-27,99213,Office visit established patient,M17.11,140.00,denied,D-DUP,Duplicate of a claim already processed for the same service and date span
+CLM-1058,PAT-005,2025-12-04,72148,MRI lumbar spine without contrast,M54.50,1650.00,denied,D-AUTHEXP,Prior authorization expired before the date of service
+CLM-1059,PAT-009,2025-11-11,93306,Echocardiogram complete,I48.91,850.00,approved,,
+CLM-1060,PAT-007,2025-07-02,99406,Smoking cessation counseling,F17.210,45.00,denied,D-CODE,Diagnosis code invalid or not coded to highest specificity

@@ -4,6 +4,7 @@ import { ensureSeeded } from "./seed";
 export interface Retrieved {
   text: string;
   source: string;
+  id?: string;
 }
 
 export async function retrieve(query: string, k = 4): Promise<Retrieved[]> {
