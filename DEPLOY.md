@@ -41,8 +41,8 @@ lock CORS down later, allow your Vercel domain explicitly.
 **Verify after the first deploy:** the streaming endpoints use `api.raw` (SSE) rather than
 managed `api()` handlers. Encore applies CORS at the gateway, so they should be covered —
 but confirm it the one way local gates can't: open the deployed Vercel site **in a browser**
-and run one streaming feature (e.g. "Why denied?"). If the JSON tabs (claims list, similar
-denials) work but the streaming answers are blocked, the `api.raw` responses aren't getting
+and ask one question in the chat (e.g. "Why was CLM-1003 denied?") — confirm the step
+lines and the answer stream in. If the claims list loads but the chat is blocked, the `api.raw` responses aren't getting
 `Access-Control-Allow-Origin` — set it explicitly in `sseInit` (`backend/claims/api.ts`).
 Test from a browser, not `curl` (curl ignores CORS).
 

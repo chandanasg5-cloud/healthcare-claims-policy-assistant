@@ -1,21 +1,27 @@
 # Healthcare Claims Policy Assistant
 
-A retrieval-augmented assistant that lets a claims analyst ask plain-language
-questions about denied healthcare claims and get answers grounded in the actual
-policy documents, with the governing rule cited (e.g. `COV-002.2`).
+An agentic chat assistant for claims analysts: free-form, multi-turn questions
+about denied healthcare claims, answered by an agent loop that looks up claims,
+searches **real CMS policy documents**, and cites the governing rule (e.g.
+`NCD 220.2`, `IOM 100-04 ch.1 §70`) — with its tool steps and sources visible
+in the UI.
 
 Re-architected from a Streamlit prototype into a **Next.js frontend (Vercel)** +
 **Encore TypeScript backend (Encore Cloud)** monorepo, driven by GitHub CI/CD.
 
 ## What it does
 
-An analyst can ask:
+One chat box. The agent decides which tools to run — visibly, step by step:
 
-- **Why was this claim denied?** — explains the denial and cites the policy rule.
-- **Which policy rule applies?** — retrieves the relevant rule for any situation.
-- **Summarize this patient's claim history.** — totals, approvals vs denials, patterns.
-- **Find similar denied claims.** — groups claims by denial code (no LLM).
-- **Generate an appeal summary.** — drafts a policy-grounded appeal for a denial.
+- `get_claim` / `get_patient_claims` / `find_similar_denied` — Postgres lookups
+- `search_policies` — full-text search over real CMS policy excerpts
+- `claims_overview` — aggregate denial counts and dollars
+
+Ask "Why was CLM-1003 denied, and can it be appealed?" and the agent looks up
+the claim, searches the prior-authorization and appeals policies, streams a
+grounded answer citing the real rule, and shows the policy excerpts it used.
+Follow-ups work ("what about her other claims?") — the conversation is
+multi-turn within a browser session.
 
 ## Architecture
 
@@ -24,7 +30,8 @@ Browser ──► Next.js (Vercel) ──fetch JSON + SSE──► Encore API �
                                                         │           (claims +
                                                         │            policy_chunks,
                                                         │            full-text tsvector)
-                                                        └──► Gemini (gemini-2.5-flash)
+                                                        └──► Gemini agent loop
+                                                             (gemini-2.5-flash + 5 tools)
 ```
 
 - **Retrieval** is Postgres **full-text search** (`tsvector` / `plainto_tsquery` /
@@ -73,6 +80,14 @@ Vercel (`frontend/`); both auto-deploy on push to `main`.
 
 ## Data
 
-`backend/claims/data/policies/` holds sample coverage policies (preventive care,
-prior authorization, medical necessity); `backend/claims/data/claims.csv` holds
-synthetic claims. All data here is synthetic and for demonstration only.
+- `backend/claims/data/policies/` holds **real CMS policy excerpts** (public
+  domain): NCD 220.1/220.2, Medicare manual chapters on prior authorization,
+  out-of-network rules, timely filing, claim edits, and appeals. Provenance
+  (source URLs, retrieval dates, curation notes) lives in
+  `backend/scripts/policy-sources.json` and each file's frontmatter.
+- `backend/claims/data/claims.csv` holds **synthetic claims** (real claim-level
+  data is PHI and not publicly available), authored so every denial is governed
+  by a real rule in the corpus — a tested invariant (`coverage.test.ts`).
+- `backend/claims/data.ts` is **generated** — after editing the data files, run
+  `node scripts/gen-data.mjs` from `backend/` (the deployed bundle cannot read
+  loose files).

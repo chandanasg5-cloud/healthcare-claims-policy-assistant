@@ -1,63 +1,68 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import {
-  getClaims,
-  getSimilarDenied,
-  whyDenied,
-  whichPolicy,
-  patientHistory,
-  appealSummary,
-} from "@/lib/api";
-import type { ClaimRow } from "@/lib/types";
-
-const TABS = [
-  "Why denied?",
-  "Which policy?",
-  "Patient history",
-  "Similar denials",
-  "Appeal summary",
-] as const;
-type Tab = (typeof TABS)[number];
+import { chatStream, getClaims } from "@/lib/api";
+import type { ChatMessage, ClaimRow } from "@/lib/types";
+import { AssistantBody, PromptChips, type Turn } from "./chat";
 
 export default function Page() {
   const [claims, setClaims] = useState<ClaimRow[]>([]);
-  const [tab, setTab] = useState<Tab>("Why denied?");
-  const [answer, setAnswer] = useState("");
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [deniedId, setDeniedId] = useState("");
-  const [patientId, setPatientId] = useState("");
-  const [question, setQuestion] = useState(
-    "An MRI was performed without prior authorization on file.",
-  );
-  const [similar, setSimilar] = useState<ClaimRow[] | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    getClaims()
-      .then(setClaims)
-      .catch(() => setClaims([]));
+    getClaims().then(setClaims).catch(() => setClaims([]));
+    return () => abortRef.current?.abort();
   }, []);
 
-  const denied = claims.filter((c) => c.status === "denied");
-  const patients = [...new Set(claims.map((c) => c.patient_id))].sort();
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [turns]);
 
-  const abortRef = useRef<AbortController | null>(null);
+  // Convert finished turns to the wire history: user text -> user, assistant
+  // answer text -> model. Steps/sources are UI-only.
+  function toMessages(all: Turn[]): ChatMessage[] {
+    const msgs: ChatMessage[] = [];
+    for (const t of all) {
+      if (t.role === "user") msgs.push({ role: "user", text: t.text });
+      else if (t.text) msgs.push({ role: "model", text: t.text });
+    }
+    return msgs;
+  }
 
-  async function run(make: (signal: AbortSignal) => AsyncGenerator<string>) {
+  async function send(question: string) {
+    const q = question.trim();
+    if (!q || busy) return;
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    setAnswer("");
+    setInput("");
     setBusy(true);
+
+    const base: Turn[] = [...turns, { role: "user", text: q }];
+    setTurns([...base, { role: "assistant", steps: [], text: "", sources: [] }]);
+
+    const update = (fn: (a: Extract<Turn, { role: "assistant" }>) => Turn) =>
+      setTurns((ts) => {
+        const last = ts.at(-1);
+        if (!last || last.role !== "assistant") return ts;
+        return [...ts.slice(0, -1), fn(last)];
+      });
+
     try {
-      for await (const t of make(controller.signal)) {
+      for await (const ev of chatStream(toMessages(base), controller.signal)) {
         if (controller.signal.aborted) break;
-        setAnswer((a) => a + t);
+        if (ev.type === "step") update((a) => ({ ...a, steps: [...a.steps, { tool: ev.tool, label: ev.label }] }));
+        else if (ev.type === "sources") update((a) => ({ ...a, sources: [...a.sources, ...ev.chunks] }));
+        else if (ev.type === "text") update((a) => ({ ...a, text: a.text + ev.text }));
+        else if (ev.type === "error") update((a) => ({ ...a, error: ev.message }));
       }
     } catch {
       if (!controller.signal.aborted) {
-        setAnswer((a) => a + "\n[stream error — is the backend running?]");
+        update((a) => ({ ...a, error: "Stream error — is the backend running?" }));
       }
     } finally {
       if (abortRef.current === controller) {
@@ -67,213 +72,85 @@ export default function Page() {
     }
   }
 
-  function switchTab(t: Tab) {
-    abortRef.current?.abort();
-    abortRef.current = null;
-    setBusy(false);
-    setTab(t);
-    setAnswer("");
-    setSimilar(null);
-  }
-
   return (
-    <main className="mx-auto flex max-w-6xl gap-6 p-6">
-      <aside className="w-64 shrink-0">
+    <main className="mx-auto flex h-screen max-w-6xl gap-6 p-6">
+      <aside className="w-64 shrink-0 overflow-y-auto">
         <h2 className="mb-2 font-semibold">Claims</h2>
         <ul className="space-y-1 text-sm">
           {claims.map((c) => (
-            <li
-              key={c.claim_id}
-              className="flex justify-between border-b border-slate-200 py-1"
-            >
-              <span>{c.claim_id}</span>
-              <span
-                className={
-                  c.status === "denied" ? "text-red-600" : "text-emerald-600"
+            <li key={c.claim_id} className="border-b border-slate-200 py-1">
+              <button
+                className="flex w-full justify-between hover:bg-slate-100"
+                onClick={() =>
+                  setInput(
+                    c.status === "denied"
+                      ? `Why was ${c.claim_id} denied?`
+                      : `Show me the details of ${c.claim_id}.`,
+                  )
                 }
               >
-                {c.status}
-              </span>
+                <span>{c.claim_id}</span>
+                <span className={c.status === "denied" ? "text-red-600" : "text-emerald-600"}>
+                  {c.status}
+                </span>
+              </button>
             </li>
           ))}
-          {claims.length === 0 && (
-            <li className="py-1 text-slate-400">No claims loaded.</li>
-          )}
+          {claims.length === 0 && <li className="py-1 text-slate-400">No claims loaded.</li>}
         </ul>
       </aside>
 
-      <section className="flex-1">
-        <h1 className="text-2xl font-bold">
-          🏥 Healthcare Claims Policy Assistant
-        </h1>
-        <p className="mb-4 text-sm text-slate-600">
-          Answers grounded in policy documents, with the governing rule cited.
+      <section className="flex min-w-0 flex-1 flex-col">
+        <h1 className="text-2xl font-bold">🏥 Healthcare Claims Policy Assistant</h1>
+        <p className="mb-3 text-sm text-slate-600">
+          Ask anything about the claims — answers cite real CMS policy. Claims data is synthetic.
         </p>
 
-        <nav className="mb-4 flex flex-wrap gap-2">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => switchTab(t)}
-              className={`rounded px-3 py-1 text-sm ${
-                tab === t
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-200 text-slate-800"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </nav>
-
-        {tab === "Why denied?" && (
-          <Controls>
-            <DeniedSelect denied={denied} value={deniedId} onChange={setDeniedId} />
-            <RunButton
-              disabled={!deniedId || busy}
-              onClick={() => run((s) => whyDenied(deniedId, s))}
-            >
-              Explain denial
-            </RunButton>
-          </Controls>
-        )}
-
-        {tab === "Which policy?" && (
-          <Controls>
-            <input
-              className="w-full rounded border border-slate-300 px-2 py-1"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-            />
-            <RunButton disabled={busy} onClick={() => run((s) => whichPolicy(question, s))}>
-              Find the rule
-            </RunButton>
-          </Controls>
-        )}
-
-        {tab === "Patient history" && (
-          <Controls>
-            <select
-              className="rounded border border-slate-300 px-2 py-1"
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
-            >
-              <option value="">Select a patient</option>
-              {patients.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-            <RunButton
-              disabled={!patientId || busy}
-              onClick={() => run((s) => patientHistory(patientId, s))}
-            >
-              Summarize
-            </RunButton>
-          </Controls>
-        )}
-
-        {tab === "Similar denials" && (
-          <Controls>
-            <DeniedSelect denied={denied} value={deniedId} onChange={setDeniedId} />
-            <RunButton
-              disabled={!deniedId || busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  setSimilar(await getSimilarDenied(deniedId));
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
-              Find similar
-            </RunButton>
-          </Controls>
-        )}
-
-        {tab === "Appeal summary" && (
-          <Controls>
-            <DeniedSelect denied={denied} value={deniedId} onChange={setDeniedId} />
-            <RunButton
-              disabled={!deniedId || busy}
-              onClick={() => run((s) => appealSummary(deniedId, s))}
-            >
-              Draft appeal
-            </RunButton>
-          </Controls>
-        )}
-
-        {tab === "Similar denials" ? (
-          similar === null ? null : similar.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500">
-              No other claims share this denial code.
+        <div className="flex-1 space-y-4 overflow-y-auto rounded bg-slate-50 p-4">
+          {turns.length === 0 && (
+            <p className="text-sm text-slate-400">
+              Start with a suggestion below, or click a claim on the left.
             </p>
-          ) : (
-            <ul className="mt-4 space-y-1 text-sm">
-              {similar.map((c) => (
-                <li key={c.claim_id}>
-                  {c.claim_id} — {c.denial_reason}
-                </li>
-              ))}
-            </ul>
-          )
-        ) : (
-          <pre className="mt-4 min-h-24 whitespace-pre-wrap rounded bg-slate-100 p-3 text-sm">
-            {answer}
-          </pre>
-        )}
+          )}
+          {turns.map((t, i) =>
+            t.role === "user" ? (
+              <div key={i} className="ml-auto max-w-[80%] rounded-lg bg-slate-900 px-3 py-2 text-sm text-white">
+                {t.text}
+              </div>
+            ) : (
+              <div key={i} className="max-w-[90%] rounded-lg bg-white px-3 py-2 shadow-sm">
+                <AssistantBody turn={t} busy={busy && i === turns.length - 1} />
+              </div>
+            ),
+          )}
+          <div ref={endRef} />
+        </div>
+
+        <div className="mt-3">
+          <PromptChips disabled={busy} onPick={send} />
+          <form
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void send(input);
+            }}
+          >
+            <input
+              className="flex-1 rounded border border-slate-300 px-3 py-2 text-sm"
+              placeholder="Ask about a claim, a policy, or a patient…"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <button
+              type="submit"
+              disabled={busy || !input.trim()}
+              className="rounded bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-50"
+            >
+              Send
+            </button>
+          </form>
+        </div>
       </section>
     </main>
-  );
-}
-
-function Controls({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-center gap-2">{children}</div>;
-}
-
-function RunButton({
-  children,
-  disabled,
-  onClick,
-}: {
-  children: ReactNode;
-  disabled?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      disabled={disabled}
-      onClick={onClick}
-      className="rounded bg-slate-900 px-3 py-1 text-sm text-white disabled:opacity-50"
-    >
-      {children}
-    </button>
-  );
-}
-
-function DeniedSelect({
-  denied,
-  value,
-  onChange,
-}: {
-  denied: ClaimRow[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <select
-      className="rounded border border-slate-300 px-2 py-1"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      <option value="">Select a denied claim</option>
-      {denied.map((c) => (
-        <option key={c.claim_id} value={c.claim_id}>
-          {c.claim_id}
-        </option>
-      ))}
-    </select>
   );
 }
