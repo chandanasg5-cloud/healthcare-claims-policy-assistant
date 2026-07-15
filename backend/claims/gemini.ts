@@ -5,7 +5,10 @@ import { toolDeclarations } from "./toolspec";
 
 const geminiKey = secret("GeminiApiKey");
 
-const MODEL = "gemini-2.5-flash";
+// flash-lite: the free tier's daily quota for gemini-2.5-flash is tiny (20/day)
+// and each chat burns 2-3 calls; lite draws from a larger separate bucket.
+// Revert to gemini-2.5-flash once the API key has billing enabled.
+const MODEL = "gemini-2.5-flash-lite";
 
 export const SYSTEM_PROMPT = `You are a healthcare claims policy assistant for claims analysts.
 You answer using ONLY what your tools return: claim records and excerpts of real
